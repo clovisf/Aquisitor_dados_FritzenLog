@@ -8,6 +8,9 @@ IDE do Arduino 1.6.9
 - Utiliza um cartão de memória tipo "SD" para
 armazenar dados obtidos a partir de entradas
 analógicas e digitais do microcontrolador
+
+- Revision R01 in 04/23/2017
+- http://www.FritzenMaker.blogspot.com.br
 - Revisao r00 iniciada em 21/06/2016
 - http://www.FritzenLab.com.br
 
@@ -16,7 +19,7 @@ analógicas e digitais do microcontrolador
 // Bibliotecas necesarias para o cartao de memoria
 #include <SPI.h>
 #include <SD.h>
-#include "DHT.h"  
+//#include "DHT.h"  
    
  // Fim do bloco de codigo das bibliotecas para o cartao de memoria
 
@@ -28,22 +31,21 @@ analógicas e digitais do microcontrolador
 #define analogica3  A3 // entrada analogica/digital 3
 #define analogica4  A4 // entrada analogica/digital 4
 #define digital1 3 // entrada digital + interrupcao
-#define DHTTYPE DHT11  // DHT 11 
+//#define DHTTYPE DHT11  // DHT 11 
 
 // Bloco de definicao de variaveis para temporizacao no sketch
 unsigned long timet;
 unsigned long previousTime;
-unsigned long tempoEntreExecs = 9999990;
+unsigned long tempoEntreExecs = 19999990;
 boolean enterFunction= true;
 // fim do bloco de definicoes de temporizacao
 
 float entradaAnalogicaUm; //variavel para recer o valor (integer) da entrada analogica 1
 float entradaAnalogicaDois; //variavel para recer o valor (integer) da entrada analogica 2
-int entradaAnalogicaTres; //variavel para recer o valor (integer) da entrada analogica 3
-int entradaAnalogicaQuatro; //variavel para recer o valor (integer) da entrada analogica 4
+float entradaAnalogicaTres; //variavel para recer o valor (integer) da entrada analogica 3
+float entradaAnalogicaQuatro; //variavel para recer o valor (integer) da entrada analogica 4
 
-DHT dht(digital1, DHTTYPE);
-boolean botaoPressionado = false; 
+boolean botaoPressionado = false;
 
 // Variaveis necessarias para o funcionamento do cartao SD
 Sd2Card card;
@@ -69,12 +71,9 @@ void setup() {
   }
   // fim da funcao de deteccao do cartao SD
 
-  Serial.begin(9600);
-  dht.begin();
-
   File dataFile = SD.open("testeum.csv", FILE_WRITE);
   if (dataFile) {  
-   dataFile.println("Tempo(s),Umidade(%),Temp_DHT11(C),Temp_Autocore,Temp_GBK");  
+   dataFile.println("Tempo(s),LDR,Painel");  
    dataFile.close();    
   }  
   
@@ -93,46 +92,31 @@ void loop() {
     // Start your code below 
     //-----------------------
     digitalWrite(ledVermelho, HIGH);
-    Serial.print("Tempo(s) = ");
-    Serial.println(micros()/1000000);
-    
-    // Sensor readings may also be up to 2 seconds 'old' (its a very slow sensor)  
-    float h = dht.readHumidity();  
-    // Read temperature as Celsius (the default)  
-    float t = dht.readTemperature();  
-
-    // Check if any reads failed and exit early (to try again).  
-    if (isnan(h) || isnan(t)) {  
-      Serial.println("Failed to read from DHT sensor!");  
-    return;  
-    }  
-
-    Serial.print("Humidity: ");  
-    Serial.print(h);  
-    Serial.print(" %\t");  
-    Serial.print("Temperature: ");  
-    Serial.print(t);  
-    Serial.println(" *C ");
+  
   
     entradaAnalogicaUm = analogRead(analogica1);
     entradaAnalogicaDois = analogRead(analogica2);
-    Serial.print("NTC Autocore = ");
-    Serial.println(entradaAnalogicaUm,0);
-    Serial.print("NTC GBK = ");
-    Serial.println(entradaAnalogicaDois,0);
+    entradaAnalogicaTres = analogRead(analogica3);
+    entradaAnalogicaQuatro = analogRead(analogica4);
+    
 
     File dataFile = SD.open("testeum.csv", FILE_WRITE);
     if (dataFile) { 
             
       dataFile.print(micros()/1000000);
       dataFile.print(",");
-      dataFile.print(h);
-      dataFile.print(",");
-      dataFile.print(t);
-      dataFile.print(",");
+      //dataFile.print(h);
+      //dataFile.print(",");
+      //dataFile.print(t);
+      //dataFile.print(",");
       dataFile.print(entradaAnalogicaUm);
       dataFile.print(",");
       dataFile.println(entradaAnalogicaDois);
+      dataFile.print(",");
+      dataFile.println(entradaAnalogicaTres);
+      dataFile.print(",");
+      dataFile.println(entradaAnalogicaQuatro);
+      dataFile.print(",");
       dataFile.close();    
     }  
     digitalWrite(ledVermelho, LOW);
